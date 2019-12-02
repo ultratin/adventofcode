@@ -13,5 +13,4 @@ def calculate(input):
 for x in file:
     total_fuel += calculate(int(x))
 
-# total_fuel = calculate(1969)
 print(total_fuel)
