@@ -14,7 +14,7 @@ const (
 	MaxUint uint = (1 << bits.UintSize) - 1
 	MaxInt  int  = (1<<bits.UintSize)/2 - 1
 	MinInt  int  = (1 << bits.UintSize) / -2
-	size         = 100000
+	size         = 100
 )
 
 //Pair struct
@@ -96,10 +96,10 @@ func printGrid(array [][]string) {
 	}
 }
 
-func calculateDist(grid [][]string, crossSections []Pair) int {
+func (zero Pair) calculateDist(crossSections []Pair) int {
 	smallest := MaxInt
-	x1 := len(grid) - 2
-	y1 := 1
+	x1 := zero.a.(int)
+	y1 := zero.b.(int)
 	for i := range crossSections {
 		x2 := crossSections[i].a.(int)
 		y2 := crossSections[i].b.(int)
@@ -165,5 +165,6 @@ func main() {
 		}
 	}
 
-	fmt.Println(calculateDist(gridSlice, crossSections))
+	starting = Pair{len(gridSlice[0]) - 2, 1}
+	fmt.Println(starting.calculateDist(crossSections))
 }
