@@ -11,10 +11,9 @@ import (
 )
 
 const (
-	MaxUint uint = (1 << bits.UintSize) - 1
-	MaxInt  int  = (1<<bits.UintSize)/2 - 1
-	MinInt  int  = (1 << bits.UintSize) / -2
-	size         = 100
+	MaxInt int = (1<<bits.UintSize)/2 - 1
+	MinInt int = (1 << bits.UintSize) / -2
+	size       = 30000
 )
 
 //Pair struct
@@ -22,69 +21,70 @@ type Pair struct {
 	a, b interface{}
 }
 
-func goUp(array [][]string, num int, currentCoords *Pair, crossSections *[]Pair) {
+func goUp(array [][]string, num int, currentCoords *Pair, crossSections *[]Pair, line int) {
 	x := currentCoords.a.(int)
 	y := currentCoords.b.(int)
 	for i := 0; i < num; i++ {
 		x--
-		if array[x][y] != "." {
-			array[x][y] = "X"
+
+		if array[x][y] == "." {
+			array[x][y] = strconv.Itoa(line)
+		} else if array[x][y] == "O" || array[x][y] == strconv.Itoa(line) {
+			break
+		} else if array[x][y] != strconv.Itoa(line) {
+			array[x][y] = "x"
 			*crossSections = append(*crossSections, Pair{x, y})
-		} else if i+1 == num {
-			array[x][y] = "+"
-		} else {
-			array[x][y] = "|"
 		}
 	}
 	*currentCoords = Pair{x, y}
 }
 
-func goDown(array [][]string, num int, currentCoords *Pair, crossSections *[]Pair) {
+func goDown(array [][]string, num int, currentCoords *Pair, crossSections *[]Pair, line int) {
 	x := currentCoords.a.(int)
 	y := currentCoords.b.(int)
 	for i := 0; i < num; i++ {
 		x++
-		if array[x][y] != "." {
-			array[x][y] = "X"
+		if array[x][y] == "." {
+			array[x][y] = strconv.Itoa(line)
+		} else if array[x][y] == "O" || array[x][y] == strconv.Itoa(line) {
+			break
+		} else if array[x][y] != strconv.Itoa(line) {
+			array[x][y] = "x"
 			*crossSections = append(*crossSections, Pair{x, y})
-		} else if i+1 == num {
-			array[x][y] = "+"
-		} else {
-			array[x][y] = "|"
 		}
 	}
 	*currentCoords = Pair{x, y}
 }
 
-func goRight(array [][]string, num int, currentCoords *Pair, crossSections *[]Pair) {
+func goRight(array [][]string, num int, currentCoords *Pair, crossSections *[]Pair, line int) {
 	x := currentCoords.a.(int)
 	y := currentCoords.b.(int)
 	for i := 0; i < num; i++ {
 		y++
-		if array[x][y] != "." {
-			array[x][y] = "X"
+		if array[x][y] == "." {
+			array[x][y] = strconv.Itoa(line)
+		} else if array[x][y] == "O" || array[x][y] == strconv.Itoa(line) {
+			break
+		} else if array[x][y] != strconv.Itoa(line) {
+			array[x][y] = "x"
 			*crossSections = append(*crossSections, Pair{x, y})
-		} else if i+1 == num {
-			array[x][y] = "+"
-		} else {
-			array[x][y] = "-"
 		}
 	}
 	*currentCoords = Pair{x, y}
 }
 
-func goLeft(array [][]string, num int, currentCoords *Pair, crossSections *[]Pair) {
+func goLeft(array [][]string, num int, currentCoords *Pair, crossSections *[]Pair, line int) {
 	x := currentCoords.a.(int)
 	y := currentCoords.b.(int)
 	for i := 0; i < num; i++ {
 		y--
-		if array[x][y] != "." {
-			array[x][y] = "X"
+		if array[x][y] == "." {
+			array[x][y] = strconv.Itoa(line)
+		} else if array[x][y] == "O" || array[x][y] == strconv.Itoa(line) {
+			break
+		} else if array[x][y] != strconv.Itoa(line) {
+			array[x][y] = "x"
 			*crossSections = append(*crossSections, Pair{x, y})
-		} else if i+1 == num {
-			array[x][y] = "+"
-		} else {
-			array[x][y] = "-"
 		}
 	}
 	*currentCoords = Pair{x, y}
@@ -135,36 +135,38 @@ func main() {
 			gridSlice[i][j] = "."
 		}
 	}
-	starting := Pair{len(gridSlice[0]) - 2, 1}
+	starting := Pair{size / 2, size / 2}
 	gridSlice[starting.a.(int)][starting.b.(int)] = "O"
 
 	file, err := os.Open("../input/q3.txt")
 	if err != nil {
-		log.Fatalf("open file error: &v", err)
+		log.Fatalf("open file error: %v", err)
 		return
 	}
 	defer file.Close()
+
+	line := 0
 	current := &starting
 	sc := bufio.NewScanner(file)
 	for sc.Scan() {
 		lines := sc.Text()
 		instructions := strings.Split(lines, ",")
-		*current = Pair{len(gridSlice[0]) - 2, 1}
+		*current = Pair{size / 2, size / 2}
+		line++
 		for i := range instructions {
 			direction := (instructions[i][0:1])
 			steps, _ := strconv.Atoi((instructions[i])[1:])
 			if direction == "U" {
-				goUp(gridSlice, steps, current, crossPtr)
+				goUp(gridSlice, steps, current, crossPtr, line)
 			} else if direction == "D" {
-				goDown(gridSlice, steps, current, crossPtr)
+				goDown(gridSlice, steps, current, crossPtr, line)
 			} else if direction == "R" {
-				goRight(gridSlice, steps, current, crossPtr)
+				goRight(gridSlice, steps, current, crossPtr, line)
 			} else {
-				goLeft(gridSlice, steps, current, crossPtr)
+				goLeft(gridSlice, steps, current, crossPtr, line)
 			}
 		}
 	}
-
-	starting = Pair{len(gridSlice[0]) - 2, 1}
+	starting = Pair{size / 2, size / 2}
 	fmt.Println(starting.calculateDist(crossSections))
 }
